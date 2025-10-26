@@ -155,12 +155,48 @@ print("\n--- STEP 7: Top-selling products by total units ---")
 print(df_product_sold)
 
 # STEP 8
-# Replace None with your code
-df_total_customers = None
+# Determine number of unique customers per product (market reach).
+df_total_customers = pd.read_sql("""
+    SELECT
+        p.productName,
+        p.productCode,
+        COUNT(DISTINCT o.customerNumber) AS numpurchasers
+    FROM products p
+    JOIN orderdetails od
+        ON p.productCode = od.productCode
+    JOIN orders o
+        ON od.orderNumber = o.orderNumber
+    GROUP BY
+        p.productName,
+        p.productCode
+    ORDER BY
+        numpurchasers DESC;
+""", conn)
+
+print("\n--- STEP 8: Unique customer count per product ---")
+print(df_total_customers)
 
 # STEP 9
-# Replace None with your code
-df_customers = None
+# Determine number of customers per office location.
+df_customers = pd.read_sql("""
+    SELECT
+        o.officeCode,
+        o.city,
+        COUNT(DISTINCT c.customerNumber) AS n_customers
+    FROM offices o
+    JOIN employees e
+        ON o.officeCode = e.officeCode
+    JOIN customers c
+        ON e.employeeNumber = c.salesRepEmployeeNumber
+    GROUP BY
+        o.officeCode,
+        o.city
+    ORDER BY
+        n_customers DESC;
+""", conn)
+
+print("\n--- STEP 9: Customer count per office ---")
+print(df_customers)
 
 # STEP 10
 # Replace None with your code
