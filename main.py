@@ -167,28 +167,33 @@ print("\n--- STEP 8: Unique customer count per product ---")
 print(df_total_customers)
 
 # STEP 9
-# Determine number of customers per office location (unique customers per office).
+# Determine number of customers per office (each customer counted once per office).
 df_customers = pd.read_sql("""
     SELECT
         o.officeCode,
         o.city,
-        COUNT(DISTINCT c.customerNumber) AS n_customers
+        COUNT(office_customers.customerNumber) AS n_customers
     FROM offices o
-    JOIN employees e
-        ON o.officeCode = e.officeCode
-    JOIN customers c
-        ON e.employeeNumber = c.salesRepEmployeeNumber
+    LEFT JOIN (
+        SELECT DISTINCT
+            e.officeCode,
+            c.customerNumber
+        FROM employees e
+        JOIN customers c
+            ON e.employeeNumber = c.salesRepEmployeeNumber
+    ) AS office_customers
+        ON o.officeCode = office_customers.officeCode
     GROUP BY
         o.officeCode,
         o.city
     ORDER BY
-        n_customers DESC;
+        o.officeCode ASC;
 """, conn)
 
 # STEP 10
-# Identify employees who sold products ordered by fewer than 20 distinct customers.
+# Identify employees who sold products ordered by fewer than 20 unique customers.
 df_under_20 = pd.read_sql("""
-    SELECT
+    SELECT DISTINCT
         e.employeeNumber,
         e.firstName,
         e.lastName,
@@ -216,13 +221,8 @@ df_under_20 = pd.read_sql("""
         HAVING
             COUNT(DISTINCT ord2.customerNumber) < 20
     )
-    GROUP BY
-        e.employeeNumber,
-        e.firstName,
-        e.lastName,
-        o.city,
-        o.officeCode
     ORDER BY
+        e.lastName ASC,
         e.firstName ASC;
 """, conn)
 
