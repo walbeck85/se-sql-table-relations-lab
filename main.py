@@ -91,8 +91,24 @@ print("\n--- STEP 4: Customers with no orders ---")
 print(df_contacts)
 
 # STEP 5
-# Replace None with your code
-df_payment = None
+# Return customer contacts with their payment amounts and dates.
+# CAST amount as REAL so sorting works numerically (not lexicographically).
+df_payment = pd.read_sql("""
+    SELECT
+        c.contactFirstName,
+        c.contactLastName,
+        p.paymentDate,
+        p.amount,
+        CAST(p.amount AS REAL) AS amount_numeric
+    FROM customers c
+    JOIN payments p
+        ON c.customerNumber = p.customerNumber
+    ORDER BY
+        amount_numeric DESC;
+""", conn)
+
+print("\n--- STEP 5: Customer payments sorted by amount (descending) ---")
+print(df_payment)
 
 # STEP 6
 # Replace None with your code
