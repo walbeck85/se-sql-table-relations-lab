@@ -167,12 +167,12 @@ print("\n--- STEP 8: Unique customer count per product ---")
 print(df_total_customers)
 
 # STEP 9
-# Determine number of customers per office location.
+# Determine number of customers per office location (unique customers per office).
 df_customers = pd.read_sql("""
     SELECT
         o.officeCode,
         o.city,
-        COUNT(c.customerNumber) AS n_customers
+        COUNT(DISTINCT c.customerNumber) AS n_customers
     FROM offices o
     JOIN employees e
         ON o.officeCode = e.officeCode
@@ -186,9 +186,7 @@ df_customers = pd.read_sql("""
 """, conn)
 
 # STEP 10
-# Find employees who sold products ordered by fewer than 20 unique customers.
-# Use a subquery to identify underperforming products (fewer than 20 distinct customers).
-
+# Identify employees who sold products ordered by fewer than 20 distinct customers.
 df_under_20 = pd.read_sql("""
     SELECT
         e.employeeNumber,
@@ -225,7 +223,7 @@ df_under_20 = pd.read_sql("""
         o.city,
         o.officeCode
     ORDER BY
-        e.employeeNumber;
+        e.firstName ASC;
 """, conn)
 
 print("\n--- STEP 10: Employees who sold products with fewer than 20 customers ---")
