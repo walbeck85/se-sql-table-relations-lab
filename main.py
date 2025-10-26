@@ -111,12 +111,48 @@ print("\n--- STEP 5: Customer payments sorted by amount (descending) ---")
 print(df_payment)
 
 # STEP 6
-# Replace None with your code
-df_credit = None
+# Identify employees whose customers have avg credit limit > 90000.
+# Return employee info and customer count. Sort by number of customers desc.
+df_credit = pd.read_sql("""
+    SELECT
+        e.employeeNumber,
+        e.firstName,
+        e.lastName,
+        COUNT(c.customerNumber) AS num_customers
+    FROM employees e
+    JOIN customers c
+        ON e.employeeNumber = c.salesRepEmployeeNumber
+    GROUP BY
+        e.employeeNumber,
+        e.firstName,
+        e.lastName
+    HAVING
+        AVG(c.creditLimit) > 90000
+    ORDER BY
+        num_customers DESC;
+""", conn)
+
+print("\n--- STEP 6: Employees with avg customer credit limit > 90000 ---")
+print(df_credit)
 
 # STEP 7
-# Replace None with your code
-df_product_sold = None
+# Determine best-selling products by total quantity ordered and number of orders.
+df_product_sold = pd.read_sql("""
+    SELECT
+        p.productName,
+        COUNT(od.orderNumber) AS numorders,
+        SUM(od.quantityOrdered) AS totalunits
+    FROM products p
+    JOIN orderdetails od
+        ON p.productCode = od.productCode
+    GROUP BY
+        p.productName
+    ORDER BY
+        totalunits DESC;
+""", conn)
+
+print("\n--- STEP 7: Top-selling products by total units ---")
+print(df_product_sold)
 
 # STEP 8
 # Replace None with your code
