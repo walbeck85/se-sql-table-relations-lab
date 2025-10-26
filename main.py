@@ -53,12 +53,42 @@ print(df_boston, flush=True)
 print(df_zero_emp, flush=True)
 
 # STEP 3
-# Replace None with your code
-df_employee = None
+# LEFT JOIN employees -> offices to include all employees, even without offices.
+df_employee = pd.read_sql("""
+    SELECT
+        e.firstName,
+        e.lastName,
+        o.city,
+        o.state
+    FROM employees e
+    LEFT JOIN offices o
+        ON e.officeCode = o.officeCode
+    ORDER BY
+        e.firstName ASC,
+        e.lastName ASC;
+""", conn)
+
+print("\n--- STEP 3: All employees with office city/state ---")
+print(df_employee)
 
 # STEP 4
-# Replace None with your code
-df_contacts = None
+# Find customers with no orders using LEFT JOIN and NULL filter.
+df_contacts = pd.read_sql("""
+    SELECT
+        c.contactFirstName,
+        c.contactLastName,
+        c.phone,
+        c.salesRepEmployeeNumber
+    FROM customers c
+    LEFT JOIN orders o
+        ON c.customerNumber = o.customerNumber
+    WHERE o.orderNumber IS NULL
+    ORDER BY
+        c.contactLastName ASC;
+""", conn)
+
+print("\n--- STEP 4: Customers with no orders ---")
+print(df_contacts)
 
 # STEP 5
 # Replace None with your code
