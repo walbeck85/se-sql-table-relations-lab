@@ -199,7 +199,47 @@ print("\n--- STEP 9: Customer count per office ---")
 print(df_customers)
 
 # STEP 10
-# Replace None with your code
-df_under_20 = None
+# Find employees who sold products ordered by fewer than 20 unique customers.
+# Use a subquery to identify underperforming products (fewer than 20 distinct customers).
 
-conn.close()
+df_under_20 = pd.read_sql("""
+    SELECT
+        e.employeeNumber,
+        e.firstName,
+        e.lastName,
+        o.city,
+        o.officeCode
+    FROM employees e
+    JOIN offices o
+        ON e.officeCode = o.officeCode
+    JOIN customers c
+        ON e.employeeNumber = c.salesRepEmployeeNumber
+    JOIN orders ord
+        ON c.customerNumber = ord.customerNumber
+    JOIN orderdetails od
+        ON ord.orderNumber = od.orderNumber
+    WHERE od.productCode IN (
+        SELECT
+            p.productCode
+        FROM products p
+        JOIN orderdetails od2
+            ON p.productCode = od2.productCode
+        JOIN orders ord2
+            ON od2.orderNumber = ord2.orderNumber
+        GROUP BY
+            p.productCode
+        HAVING
+            COUNT(DISTINCT ord2.customerNumber) < 20
+    )
+    GROUP BY
+        e.employeeNumber,
+        e.firstName,
+        e.lastName,
+        o.city,
+        o.officeCode
+    ORDER BY
+        e.employeeNumber;
+""", conn)
+
+print("\n--- STEP 10: Employees who sold products with fewer than 20 customers ---")
+print(df_under_20)
