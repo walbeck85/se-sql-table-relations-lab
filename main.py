@@ -16,21 +16,16 @@ print(pd.read_sql("""
 """, conn))
 
 # STEP 1
-# Return first/last name and job title for all employees in Boston.
-# JOIN employees -> offices and filter with WHERE on city = 'Boston'.
+# Return first and last name of employees in Boston.
 df_boston = pd.read_sql("""
     SELECT
         e.firstName,
-        e.lastName,
-        e.jobTitle
+        e.lastName
     FROM employees e
     JOIN offices o
         ON e.officeCode = o.officeCode
     WHERE o.city = 'Boston';
 """, conn)
-
-print("\n--- STEP 1: Employees in Boston ---")
-print(df_boston)
 
 # STEP 2
 # Find offices that have zero employees.
@@ -91,24 +86,19 @@ print("\n--- STEP 4: Customers with no orders ---")
 print(df_contacts)
 
 # STEP 5
-# Return customer contacts with their payment amounts and dates.
-# CAST amount as REAL so sorting works numerically (not lexicographically).
+# Return customer contacts with payment amount/date; sort numerically by amount.
 df_payment = pd.read_sql("""
     SELECT
         c.contactFirstName,
         c.contactLastName,
         p.paymentDate,
-        p.amount,
-        CAST(p.amount AS REAL) AS amount_numeric
+        CAST(p.amount AS REAL) AS amount
     FROM customers c
     JOIN payments p
         ON c.customerNumber = p.customerNumber
     ORDER BY
-        amount_numeric DESC;
+        amount DESC;
 """, conn)
-
-print("\n--- STEP 5: Customer payments sorted by amount (descending) ---")
-print(df_payment)
 
 # STEP 6
 # Identify employees whose customers have avg credit limit > 90000.
@@ -182,7 +172,7 @@ df_customers = pd.read_sql("""
     SELECT
         o.officeCode,
         o.city,
-        COUNT(DISTINCT c.customerNumber) AS n_customers
+        COUNT(c.customerNumber) AS n_customers
     FROM offices o
     JOIN employees e
         ON o.officeCode = e.officeCode
@@ -194,9 +184,6 @@ df_customers = pd.read_sql("""
     ORDER BY
         n_customers DESC;
 """, conn)
-
-print("\n--- STEP 9: Customer count per office ---")
-print(df_customers)
 
 # STEP 10
 # Find employees who sold products ordered by fewer than 20 unique customers.
